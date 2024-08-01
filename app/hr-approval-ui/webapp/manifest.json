@@ -1,11 +1,11 @@
 {
   "_version": "1.59.0",
   "sap.app": {
-    "id": "hrapprovalui",
+    "id": "capgenairag.hrapprovalui",
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
-      "version": "0.0.1"
+      "version": "${version}"
     },
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
@@ -17,7 +17,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/chat/",
+        "uri": "odata/v4/chat/",
         "type": "OData",
         "settings": {
           "annotations": [],
@@ -25,7 +25,7 @@
         }
       },
       "fileService":{
-        "uri": "/odata/v4/embedding-storage/",
+        "uri": "odata/v4/embedding-storage/",
         "type": "OData",
         "settings": {
           "annotations": [],
@@ -65,7 +65,7 @@
     }
   },
   "sap.ui5": {
-    "flexEnabled": true,
+    "flexEnabled": false,
     "dependencies": {
       "minUI5Version": "1.120.9",
       "libs": {
@@ -175,6 +175,6 @@
   },
   "sap.cloud": {
     "public": true,
-    "service": "hr.app"
+    "service": "capgenairag.service"
   }
 }

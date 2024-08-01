@@ -32,3 +32,9 @@ mta_archives/
 
 # @cap-js/cds-typer
 @cds-models
+
+Makefile*
+resources/
+dist/
+.eslintcache
+db.*

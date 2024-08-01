@@ -56,10 +56,25 @@ modules:
           artifacts:
             - documents.zip
           target-path: app/
+        - name: capgenairaghrapprovalui
+          artifacts:
+            - hrapprovalui.zip
+          target-path: app/
 
   - name: capgenairagdocuments
     type: html5
     path: app/documents
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: capgenairaghrapprovalui
+    type: html5
+    path: app/hr-approval-ui
     build-parameters:
       build-result: dist
       builder: custom
