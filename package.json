@@ -1,0 +1,42 @@
+{
+  "name": "cap-gen-ai-rag",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^8.1.0",
+    "@sap/xsenv": "^5.2.0",
+    "@sap/xssec": "^4",
+    "express": "^4.19.2",
+    "langchain": "^0.2.12",
+    "@cap-js/hana": "^1"
+  },
+  "devDependencies": {
+    "@cap-js/cds-types": "^0.6.3",
+    "@cap-js/sqlite": "^1.7.3",
+    "@sap/cds-dk": "^8",
+    "@sap/ux-specification": "^1.120.15"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-documents": "cds watch --open documents/webapp/index.html?sap-ui-xx-viewCache=false",
+    "build": "mbt build -t gen --mtar archive",
+    "deploy": "cf deploy gen/archive.mtar --retries 1 --delete-services"
+  },
+  "sapux": [
+    "app/documents"
+  ],
+  "cds": {
+    "requires": {
+      "[production]": {
+        "db": "hana",
+        "auth": "xsuaa"
+      },
+      "destinations": true,
+      "html5-repo": true,
+      "workzone": true
+    }
+  }
+}

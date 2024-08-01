@@ -1,0 +1,153 @@
+_schema-version: 3.3.0
+ID: cap-gen-ai-rag
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+  deploy_mode: html5-repo
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+modules:
+  - name: cap-gen-ai-rag-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      readiness-health-check-type: http
+      readiness-health-check-http-endpoint: /health
+    build-parameters:
+      builder: npm
+      ignore:
+        - .env
+        - node_modules/
+        - default-env.json
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: cap-gen-ai-rag-db
+      - name: cap-gen-ai-rag-auth
+      - name: cap-gen-ai-rag-destination
+
+  - name: cap-gen-ai-rag-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: cap-gen-ai-rag-db
+
+  - name: cap-gen-ai-rag-app-deployer
+    type: com.sap.application.content
+    path: gen
+    requires:
+      - name: cap-gen-ai-rag-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: app/
+      requires:
+        - name: capgenairagdocuments
+          artifacts:
+            - documents.zip
+          target-path: app/
+
+  - name: capgenairagdocuments
+    type: html5
+    path: app/documents
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: cap-gen-ai-rag-destinations
+    type: com.sap.application.content
+    requires:
+      - name: cap-gen-ai-rag-auth
+        parameters:
+          service-key:
+            name: cap-gen-ai-rag-auth-key
+      - name: cap-gen-ai-rag-html5-repo-host
+        parameters:
+          service-key:
+            name: cap-gen-ai-rag-html5-repo-host-key
+      - name: srv-api
+      - name: cap-gen-ai-rag-destination
+        parameters:
+          content-target: true
+    build-parameters:
+      no-source: true
+    parameters:
+      content:
+        instance:
+          existing_destinations_policy: update
+          destinations:
+            - Name: cap-gen-ai-rag-app-srv
+              Authentication: OAuth2UserTokenExchange
+              TokenServiceInstanceName: cap-gen-ai-rag-auth
+              TokenServiceKeyName: cap-gen-ai-rag-auth-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: capgenairag.service
+            - Name: cap-gen-ai-rag-html5-repository
+              ServiceInstanceName: cap-gen-ai-rag-html5-repo-host
+              ServiceKeyName: cap-gen-ai-rag-html5-repo-host-key
+              sap.cloud.service: capgenairag.service
+            - Name: cap-gen-ai-rag-auth
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: cap-gen-ai-rag-auth
+              ServiceKeyName: cap-gen-ai-rag-auth-key
+              sap.cloud.service: capgenairag.service
+
+resources:
+  - name: cap-gen-ai-rag-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: cap-gen-ai-rag-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: cap-gen-ai-rag-auth
+        tenant-mode: dedicated
+  - name: cap-gen-ai-rag-destination
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: srv-api
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            existing_destinations_policy: update
+            destinations:
+              - Name: cap-gen-ai-rag-srv-api
+                URL: ~{srv-api/srv-url}
+                Authentication: OAuth2UserTokenExchange
+                Type: HTTP
+                ProxyType: Internet
+                HTML5.ForwardAuthToken: true
+                HTML5.DynamicDestination: true
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+  - name: cap-gen-ai-rag-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
