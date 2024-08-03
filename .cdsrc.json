@@ -4,9 +4,32 @@
       "db": "hana",
       "auth": "xsuaa"
     },
+    "auth": {
+      "kind": "mocked",
+      "users": {
+        "alice": { "tenant": "t1", "roles": ["admin"] }
+      }
+    },
     "destinations": true,
     "html5-repo": true,
-    "workzone": true
+    "workzone": true,
+    "GENERATIVE_AI_HUB": {
+      "CHAT_MODEL_DESTINATION_NAME": "AICoreAzureOpenAIDestination",
+      "CHAT_MODEL_DEPLOYMENT_URL": "/inference/deployments/dc52dba098be3c37",
+      "CHAT_MODEL_RESOURCE_GROUP": "default",
+      "CHAT_MODEL_API_VERSION": "2023-05-15",
+      "EMBEDDING_MODEL_DESTINATION_NAME": "AICoreAzureOpenAIDestination",
+      "EMBEDDING_MODEL_DEPLOYMENT_URL": "/inference/deployments/d643dced45460481",
+      "EMBEDDING_MODEL_RESOURCE_GROUP": "default",
+      "EMBEDDING_MODEL_API_VERSION": "2023-05-15"
+    },
+    "AICoreAzureOpenAIDestination": {
+      "kind": "rest",
+      "credentials": {
+        "destination": "GENERATIVE_AI_HUB",
+        "requestTimeout": "300000"
+      }
+    }
   },
   "cdsc": {
     "severities": {

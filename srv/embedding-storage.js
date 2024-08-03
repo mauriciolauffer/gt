@@ -1,11 +1,11 @@
-const fs = require('node:fs');
-const cds = require('@sap/cds');
+const xxx = require("cap-llm-plugin");
+const fs = require("node:fs");
+const cds = require("@sap/cds");
 const { INSERT, DELETE, SELECT } = cds.ql;
-const { TextLoader } = require('langchain/document_loaders/fs/text');
+const { TextLoader } = require("langchain/document_loaders/fs/text");
 const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
-const { PDFDocument } = require('pdf-lib');
-const { PDFLoader } = require('langchain/document_loaders/fs/pdf');
-
+const { PDFDocument } = require("pdf-lib");
+const { PDFLoader } = require("langchain/document_loaders/fs/pdf");
 
 // Helper method to convert embeddings to buffer for insertion
 let array2VectorBuffer = (data) => {
@@ -27,28 +27,25 @@ const deleteIfExists = (filePath) => {
   try {
     fs.unlink(filePath, (err) => {
       if (err) {
-        if (err.code === 'ENOENT') {
-          console.log('File does not exist');
+        if (err.code === "ENOENT") {
+          console.log("File does not exist");
         } else {
-          console.error('Error deleting file:', err);
+          console.error("Error deleting file:", err);
         }
       } else {
-        console.log('File deleted successfully');
+        console.log("File deleted successfully");
       }
     });
   } catch (unlinkErr) {
-    console.error('Error occurred while attempting to delete file:', unlinkErr);
+    console.error("Error occurred while attempting to delete file:", unlinkErr);
   }
 };
 
-
 module.exports = function () {
-
-  this.on('storeEmbeddings', async (req) => {
+  this.on("storeEmbeddings", async (req) => {
     try {
-
       const { uuid } = req.data;
-      const db = await cds.connect.to('db');
+      const db = await cds.connect.to("db");
       const { Files, DocumentChunk } = this.entities;
       const vectorplugin = await cds.connect.to("cap-llm-plugin");
       let textChunkEntries = [];
@@ -56,12 +53,16 @@ module.exports = function () {
       // Check if document exists
       const isDocumentPresent = await SELECT.from(Files).where({ ID: uuid });
       if (isDocumentPresent.length == 0) {
-        throw new Error(`Document with uuid:  ${uuid} not yet persisted in database!`)
+        throw new Error(
+          `Document with uuid:  ${uuid} not yet persisted in database!`,
+        );
       }
 
       // Load pdf from HANA and create a temp pdf doc
-      const stream = await db.stream(SELECT('content').from(Files, uuid));
-      const fileName = await SELECT('fileName').from(Files).where({ ID: uuid });
+      const result = await SELECT("content").from(Files, uuid);
+      const stream = result.content;
+      // const stream = await db.stream(SELECT('content').from(Files, uuid));
+      const fileName = await SELECT("fileName").from(Files).where({ ID: uuid });
       const tempDocLocation = __dirname + `/${fileName[0].fileName}`;
 
       // Create a new PDF document
@@ -69,13 +70,13 @@ module.exports = function () {
       const pdfBytes = [];
 
       // Read PDF content and store it in pdfBytes array
-      stream.on('data', (chunk) => {
+      stream.on("data", (chunk) => {
         pdfBytes.push(chunk);
       });
 
       // Wait for the stream to finish
       await new Promise((resolve, reject) => {
-        stream.on('end', () => {
+        stream.on("end", () => {
           resolve();
         });
       });
@@ -87,7 +88,10 @@ module.exports = function () {
       const externalPdfDoc = await PDFDocument.load(pdfBuffer);
 
       // Copy pages from external PDF document to the new document
-      const pages = await pdfDoc.copyPages(externalPdfDoc, externalPdfDoc.getPageIndices());
+      const pages = await pdfDoc.copyPages(
+        externalPdfDoc,
+        externalPdfDoc.getPageIndices(),
+      );
       pages.forEach((page) => {
         pdfDoc.addPage(page);
       });
@@ -96,9 +100,9 @@ module.exports = function () {
       const pdfData = await pdfDoc.save();
       await fs.writeFileSync(tempDocLocation, pdfData);
 
-      console.log('Temporary PDF File restored and saved to:', tempDocLocation);
+      console.log("Temporary PDF File restored and saved to:", tempDocLocation);
 
-      // Delete existing embeddings 
+      // Delete existing embeddings
       await DELETE.from(DocumentChunk);
 
       // Load the document to langchain text loader
@@ -110,7 +114,7 @@ module.exports = function () {
       const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1500,
         chunkOverlap: 150,
-        addStartIndex: true
+        addStartIndex: true,
       });
 
       const textChunks = await splitter.splitDocuments(document);
@@ -121,47 +125,44 @@ module.exports = function () {
       for (const chunk of textChunks) {
         const embedding = await vectorplugin.getEmbedding(chunk.pageContent);
         const entry = {
-          "text_chunk": chunk.pageContent,
-          "metadata_column": fileName,
-          "embedding": array2VectorBuffer(embedding)
+          text_chunk: chunk.pageContent,
+          metadata_column: fileName,
+          embedding: array2VectorBuffer(embedding),
         };
         textChunkEntries.push(entry);
       }
 
       console.log("Inserting text chunks with embeddings into db.");
       // Insert the text chunk with embeddings into db
-      const insertStatus = await INSERT.into(DocumentChunk).entries(textChunkEntries);
+      const insertStatus =
+        await INSERT.into(DocumentChunk).entries(textChunkEntries);
       if (!insertStatus) {
         throw new Error("Insertion of text chunks into db failed!");
       }
 
       // Delete temp document
       deleteIfExists(tempDocLocation);
-
-    }
-    catch (error) {
+    } catch (error) {
       // Handle any errors that occur during the execution
-      console.log('Error while generating and storing vector embeddings:', error);
+      console.log(
+        "Error while generating and storing vector embeddings:",
+        error,
+      );
       throw error;
     }
     return "Embeddings stored successfully!";
+  });
 
-  })
-
-
-  this.on('deleteEmbeddings', async () => {
+  this.on("deleteEmbeddings", async () => {
     try {
       // Delete any previous records in the table
       const { DocumentChunk } = this.entities;
       await DELETE.from(DocumentChunk);
-      return "Success!"
-    }
-    catch (error) {
+      return "Success!";
+    } catch (error) {
       // Handle any errors that occur during the execution
-      console.log('Error while deleting the embeddings content in db:', error);
+      console.log("Error while deleting the embeddings content in db:", error);
       throw error;
     }
-  })
-
-
-}
+  });
+};

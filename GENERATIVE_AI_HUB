@@ -1,0 +1,15 @@
+#clientSecret=<< Existing password/certificate removed on export >>
+#
+#Fri Aug 02 22:50:48 UTC 2024
+Type=HTTP
+clientId=sb-3857bf78-190b-4822-86fb-75c188a87e53\!b1178|aicore\!b1456
+HTML5.Timeout=300000
+HTML5.DynamicDestination=true
+Authentication=OAuth2ClientCredentials
+URL.headers.AI-Resource-Group=default
+Name=GENERATIVE_AI_HUB
+tokenServiceURL=https\://cspindev.authentication.ap10.hana.ondemand.com/oauth/token
+URL=https\://api.ai.prod.ap-southeast-2.aws.ml.hana.ondemand.com/V2
+ProxyType=Internet
+tokenServiceURLType=Dedicated
+URL.headers.Content-Type=application/json

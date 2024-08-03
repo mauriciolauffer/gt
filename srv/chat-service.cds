@@ -1,6 +1,6 @@
 using {capgenairag as db} from '../db/schema';
 
-service ChatService @(requires: 'authenticated-user') {
+service ChatService  {
     entity Conversation as projection on db.Conversation;
     entity Message      as projection on db.Message;
 

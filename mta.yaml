@@ -70,8 +70,7 @@ modules:
       commands:
         - npm ci
         - npm run build
-      supported-platforms:
-        []
+      supported-platforms: []
   - name: capgenairaghrapprovalui
     type: html5
     path: app/hr-approval-ui
@@ -81,8 +80,7 @@ modules:
       commands:
         - npm ci
         - npm run build
-      supported-platforms:
-        []
+      supported-platforms: []
   - name: cap-gen-ai-rag-destinations
     type: com.sap.application.content
     requires:

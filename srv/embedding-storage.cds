@@ -1,6 +1,6 @@
 using {capgenairag as db} from '../db/schema';
 
-service EmbeddingStorageService @(requires: 'authenticated-user') {
+service EmbeddingStorageService  {
   entity DocumentChunk as
     projection on db.DocumentChunk
     excluding {
