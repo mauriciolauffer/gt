@@ -62,7 +62,8 @@ sap.ui.define(
         var appPath = appId.replaceAll(".", "/");
         var appModulePath = jQuery.sap.getModulePath(appPath);
         appModulePath = "";
-        return appModulePath;
+        // return appModulePath;
+        return ".";
       },
 
       onRouteMatched(oEvent) {

@@ -8,7 +8,8 @@ const {
 
 userId = cds.env.requires["SUCCESS_FACTORS_CREDENTIALS"]?.["USER_ID"];
 
-const tableName = "SAP_TISCE_DEMO_DOCUMENTCHUNK";
+//const tableName = "SAP_TISCE_DEMO_DOCUMENTCHUNK";
+const tableName = "CAPGENAIRAG_DOCUMENTCHUNK";
 const embeddingColumn = "EMBEDDING";
 const contentColumn = "TEXT_CHUNK";
 
@@ -139,9 +140,13 @@ module.exports = function () {
         messages: determinationPayload,
       };
 
-      const determinationResponse =
+      let determinationResponse =
         await vectorplugin.getChatCompletion(payload);
-      const determinationJson = JSON.parse(determinationResponse.content);
+        let responseContent = determinationResponse.content;
+        if (responseContent.substring(0, 7) === '```json') {
+          responseContent = responseContent.substring(7, responseContent.length - 3);
+        } 
+      const determinationJson = JSON.parse(responseContent);
       const category = determinationJson?.category;
 
       if (!taskCategory.hasOwnProperty(category)) {

@@ -77,7 +77,9 @@
         "sap.ui.generic.app": {},
         "sap.ui.table": {},
         "sap.ushell": {},
-        "sap.ui.unified": {}
+        "sap.ui.unified": {},
+        "sap.tnt": {},
+        "sap.ui.fl": {}
       }
     },
     "contentDensities": {
