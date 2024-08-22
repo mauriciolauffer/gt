@@ -4,8 +4,8 @@ using {cuid, managed} from '@sap/cds/common';
 
 entity Documents : cuid {
     text      : String;
-    embedding : Vector(1536);
-    // embedding       : String; // for local test with SQLite only
+    // embedding : Vector(1536);
+    embedding       : String; // for local test with SQLite only
 }
 
 entity Conversation {
@@ -29,7 +29,7 @@ entity Message {
 entity DocumentChunk : cuid {
     text_chunk      : LargeString;
     metadata_column : LargeString;
-    embedding       : Vector(1536);
+     embedding       : Vector(1536);
     // embedding       : String; // for local test with SQLite only
 }
 

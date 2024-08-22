@@ -1,0 +1,8 @@
+<mvc:View controllerName="chatting.controller.LeftScreen"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f"
+    xmlns="sap.m"
+    height="100%"
+    displayBlock="true"
+>
+</mvc:View>

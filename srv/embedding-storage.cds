@@ -21,3 +21,11 @@ service EmbeddingStorageService  {
   function deleteEmbeddings()             returns String;
 
 }
+
+/* annotate EmbeddingStorageService.DocumentChunk with
+@odata.draft.enabled
+@Capabilities.Updatable : false;
+
+annotate EmbeddingStorageService.Files with
+@odata.draft.enabled
+@Capabilities.Updatable : false; */

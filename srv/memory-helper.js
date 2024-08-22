@@ -169,16 +169,20 @@ async function getConversationSummarization(userQuestion) {
       {
         role: "assistant",
         content:
-          "Generate short summarization on the user input, no matter whether the user input is a question or not. The short summarization should be able to be used the conversation title.",
+          "Generate short summarization on the user input, no matter whether the user input is a question or not. The short summarization should be one phrase to be used as the conversation title.",
       },
     ],
     temperature: 0.0,
   };
 
   const genAISrv = await cds.connect.to(genAIDestName);
-
-  const response = await genAISrv.send({
+  /* const response = await genAISrv.send({
     query: `POST ${modelDeploymentUri}/chat/completions?api-version=${apiVersion}`,
+    headers: reqHeaders,
+    data: reqPayload,
+  }); */
+  const response = await genAISrv.post({
+    query: `${modelDeploymentUri}/chat/completions?api-version=${apiVersion}`,
     headers: reqHeaders,
     data: reqPayload,
   });

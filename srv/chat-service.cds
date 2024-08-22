@@ -1,6 +1,6 @@
 using {capgenairag as db} from '../db/schema';
 
-service ChatService  {
+service ChatService {
     entity Conversation as projection on db.Conversation;
     entity Message      as projection on db.Message;
 
@@ -17,5 +17,7 @@ service ChatService  {
     }
 
     action   getChatRagResponse(conversationId : String, messageId : String, message_time : Timestamp, user_id : String, user_query : String) returns RagResponse;
+    action   getAiResponse(sessionId : String, content : String, timestamp : Timestamp) returns RagResponse;
     function deleteChatData()                                                                                                                 returns String;
+    action   deleteChatSession(sessionId: UUID)                                                                                                                     returns String;
 }

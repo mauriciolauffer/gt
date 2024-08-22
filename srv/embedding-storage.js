@@ -1,4 +1,3 @@
-const xxx = require("cap-llm-plugin");
 const fs = require("node:fs");
 const cds = require("@sap/cds");
 const { INSERT, DELETE, SELECT } = cds.ql;
@@ -41,128 +40,152 @@ const deleteIfExists = (filePath) => {
   }
 };
 
-module.exports = function () {
-  this.on("storeEmbeddings", async (req) => {
-    try {
-      const { uuid } = req.data;
-      const db = await cds.connect.to("db");
-      const { Files, DocumentChunk } = this.entities;
-      const vectorplugin = await cds.connect.to("cap-llm-plugin");
-      let textChunkEntries = [];
+module.exports = class Embedding extends cds.ApplicationService {
+  init() {
+    const { Files, DocumentChunk } = this.entities;
+    this.on("CREATE", DocumentChunk, async (req) => {
+      console.dir('on..........');
+      console.dir(req.data);
+      await cds.create(DocumentChunk).entries(req.data)
+    });
 
-      // Check if document exists
-      const isDocumentPresent = await SELECT.from(Files).where({ ID: uuid });
-      if (isDocumentPresent.length == 0) {
-        throw new Error(
-          `Document with uuid:  ${uuid} not yet persisted in database!`,
-        );
-      }
+    this.after("CREATE", DocumentChunk, (results) => {
+      console.dir('after..............');
+      console.dir(results);
+    });
 
-      // Load pdf from HANA and create a temp pdf doc
-      const result = await SELECT("content").from(Files, uuid);
-      const stream = result.content;
-      // const stream = await db.stream(SELECT('content').from(Files, uuid));
-      const fileName = await SELECT("fileName").from(Files).where({ ID: uuid });
-      const tempDocLocation = __dirname + `/${fileName[0].fileName}`;
+    this.on("storeEmbeddings", async (req) => {
+      try {
+        const { uuid } = req.data;
+        const db = await cds.connect.to("db");
+        const { Files, DocumentChunk } = this.entities;
+        const vectorplugin = await cds.connect.to("cap-llm-plugin");
+        let textChunkEntries = [];
 
-      // Create a new PDF document
-      const pdfDoc = await PDFDocument.create();
-      const pdfBytes = [];
+        // Check if document exists
+        const isDocumentPresent = await SELECT.from(Files).where({ ID: uuid });
+        if (isDocumentPresent.length === 0) {
+          throw new Error(
+            `Document with uuid:  ${uuid} not yet persisted in database!`
+          );
+        }
 
-      // Read PDF content and store it in pdfBytes array
-      stream.on("data", (chunk) => {
-        pdfBytes.push(chunk);
-      });
+        // Load pdf from HANA and create a temp pdf doc
+        const result = await SELECT("content").from(Files, uuid);
+        const stream = result.content;
+        // const stream = await db.stream(SELECT('content').from(Files, uuid));
+        const fileName = await SELECT("fileName")
+          .from(Files)
+          .where({ ID: uuid });
+        const tempDocLocation = __dirname + `/${fileName[0].fileName}`;
 
-      // Wait for the stream to finish
-      await new Promise((resolve, reject) => {
-        stream.on("end", () => {
-          resolve();
+        // Create a new PDF document
+        const pdfDoc = await PDFDocument.create();
+        const pdfBytes = [];
+
+        // Read PDF content and store it in pdfBytes array
+        stream.on("data", (chunk) => {
+          pdfBytes.push(chunk);
         });
-      });
 
-      // Convert pdfBytes array to a single Buffer
-      const pdfBuffer = Buffer.concat(pdfBytes);
+        // Wait for the stream to finish
+        await new Promise((resolve, reject) => {
+          stream.on("end", () => {
+            resolve();
+          });
+        });
 
-      // Load PDF data into a document
-      const externalPdfDoc = await PDFDocument.load(pdfBuffer);
+        // Convert pdfBytes array to a single Buffer
+        const pdfBuffer = Buffer.concat(pdfBytes);
 
-      // Copy pages from external PDF document to the new document
-      const pages = await pdfDoc.copyPages(
-        externalPdfDoc,
-        externalPdfDoc.getPageIndices(),
-      );
-      pages.forEach((page) => {
-        pdfDoc.addPage(page);
-      });
+        // Load PDF data into a document
+        const externalPdfDoc = await PDFDocument.load(pdfBuffer);
 
-      // Save the PDF document to a new file
-      const pdfData = await pdfDoc.save();
-      await fs.writeFileSync(tempDocLocation, pdfData);
+        // Copy pages from external PDF document to the new document
+        const pages = await pdfDoc.copyPages(
+          externalPdfDoc,
+          externalPdfDoc.getPageIndices()
+        );
+        pages.forEach((page) => {
+          pdfDoc.addPage(page);
+        });
 
-      console.log("Temporary PDF File restored and saved to:", tempDocLocation);
+        // Save the PDF document to a new file
+        const pdfData = await pdfDoc.save();
+        await fs.writeFileSync(tempDocLocation, pdfData);
 
-      // Delete existing embeddings
-      await DELETE.from(DocumentChunk);
+        console.log(
+          "Temporary PDF File restored and saved to:",
+          tempDocLocation
+        );
 
-      // Load the document to langchain text loader
-      loader = new PDFLoader(tempDocLocation);
-      const document = await loader.load();
+        // Delete existing embeddings
+        await DELETE.from(DocumentChunk);
 
-      // Split the document into chunks
-      console.log("Splitting the document into text chunks.");
-      const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1500,
-        chunkOverlap: 150,
-        addStartIndex: true,
-      });
+        // Load the document to langchain text loader
+        loader = new PDFLoader(tempDocLocation);
+        const document = await loader.load();
 
-      const textChunks = await splitter.splitDocuments(document);
-      console.log(`Documents split into ${textChunks.length} chunks.`);
+        // Split the document into chunks
+        console.log("Splitting the document into text chunks.");
+        const splitter = new RecursiveCharacterTextSplitter({
+          chunkSize: 1500,
+          chunkOverlap: 150,
+          addStartIndex: true,
+        });
 
-      console.log("Generating the vector embeddings for the text chunks.");
-      // For each text chunk generate the embeddings
-      for (const chunk of textChunks) {
-        const embedding = await vectorplugin.getEmbedding(chunk.pageContent);
-        const entry = {
-          text_chunk: chunk.pageContent,
-          metadata_column: fileName,
-          embedding: array2VectorBuffer(embedding),
-        };
-        textChunkEntries.push(entry);
+        const textChunks = await splitter.splitDocuments(document);
+        console.log(`Documents split into ${textChunks.length} chunks.`);
+
+        console.log("Generating the vector embeddings for the text chunks.");
+        // For each text chunk generate the embeddings
+        for (const chunk of textChunks) {
+          const embedding = await vectorplugin.getEmbedding(chunk.pageContent);
+          const entry = {
+            text_chunk: chunk.pageContent,
+            metadata_column: fileName,
+            embedding: array2VectorBuffer(embedding),
+          };
+          textChunkEntries.push(entry);
+        }
+
+        console.log("Inserting text chunks with embeddings into db.");
+        // Insert the text chunk with embeddings into db
+        const insertStatus =
+          await INSERT.into(DocumentChunk).entries(textChunkEntries);
+        if (!insertStatus) {
+          throw new Error("Insertion of text chunks into db failed!");
+        }
+
+        // Delete temp document
+        deleteIfExists(tempDocLocation);
+      } catch (error) {
+        // Handle any errors that occur during the execution
+        console.log(
+          "Error while generating and storing vector embeddings:",
+          error
+        );
+        throw error;
       }
+      return "Embeddings stored successfully!";
+    });
 
-      console.log("Inserting text chunks with embeddings into db.");
-      // Insert the text chunk with embeddings into db
-      const insertStatus =
-        await INSERT.into(DocumentChunk).entries(textChunkEntries);
-      if (!insertStatus) {
-        throw new Error("Insertion of text chunks into db failed!");
+    this.on("deleteEmbeddings", async () => {
+      try {
+        // Delete any previous records in the table
+        const { DocumentChunk } = this.entities;
+        await DELETE.from(DocumentChunk);
+        return "Success!";
+      } catch (error) {
+        // Handle any errors that occur during the execution
+        console.log(
+          "Error while deleting the embeddings content in db:",
+          error
+        );
+        throw error;
       }
+    });
 
-      // Delete temp document
-      deleteIfExists(tempDocLocation);
-    } catch (error) {
-      // Handle any errors that occur during the execution
-      console.log(
-        "Error while generating and storing vector embeddings:",
-        error,
-      );
-      throw error;
-    }
-    return "Embeddings stored successfully!";
-  });
-
-  this.on("deleteEmbeddings", async () => {
-    try {
-      // Delete any previous records in the table
-      const { DocumentChunk } = this.entities;
-      await DELETE.from(DocumentChunk);
-      return "Success!";
-    } catch (error) {
-      // Handle any errors that occur during the execution
-      console.log("Error while deleting the embeddings content in db:", error);
-      throw error;
-    }
-  });
+    return super.init();
+  }
 };

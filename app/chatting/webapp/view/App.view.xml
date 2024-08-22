@@ -1,0 +1,12 @@
+<mvc:View 
+    controllerName="chatting.controller.App"
+    xmlns:f="sap.f" 
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    height="100%"
+    displayBlock="true">
+    <m:App id="app">
+        <f:FlexibleColumnLayout id="flexibleColumnLayout" backgroundDesign="Solid">
+        </f:FlexibleColumnLayout>
+    </m:App>
+</mvc:View>

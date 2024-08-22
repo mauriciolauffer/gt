@@ -1,0 +1,89 @@
+<mvc:View xmlns:tnt="sap.tnt"
+    controllerName="chatting.controller.LeftScreen"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f"
+    xmlns="sap.m"
+    height="100%"
+    displayBlock="true"
+>
+    <Page
+        id="lefeScreenPage"
+        showHeader="false"
+        showFooter="false">
+
+        <!-- Left Screen Page Content-->
+        <content>
+
+            <!-- Left Screen - Overflow Tool Bar -->
+            <OverflowToolbar 
+                id="leftScreenOverflowToolBar"
+                height="3rem">
+                <Title
+                    id="leftScreenToolBarTitle"
+                    text="Chats"
+                />
+                <ToolbarSpacer id="leftScreenToolBarSpacer" />
+                <Button
+                    id="leftScreenToolBarButton"
+                    icon="sap-icon://add"
+                    text="New chat"
+                    press=".onCreateNewChat"
+                />
+            </OverflowToolbar>
+
+            <!-- Left Screen - Chat List -->
+            <ScrollContainer
+                id="leftScreenScrollContainer"
+                vertical="true"
+                height="80%"
+                focusable="true">
+                <List
+                    id="leftScreenChatList"
+                    growing="true"
+                    growingThreshold="15"
+                    growingScrollToLoad="true"
+                    noDataText="No chat history available"
+                    enableBusyIndicator="true"
+                    items="{
+                            path:'/Conversation',
+                            sorter:{
+                                path:'last_update_time',
+                                descending: true
+                            }
+                        }"
+                    itemPress=".onConversationPress"
+                    mode="Delete"
+                    delete=".onHandleConversationDelete"
+                    >
+                    <StandardListItem
+                        id="_IDGenStandardListItem1"
+                        type="Navigation"
+                        title="{= ${title}.length > 0 ? ${title} : 'Local Testing'}"
+                        description="{userID}"
+                    />
+                </List>
+            </ScrollContainer>
+
+            <tnt:NavigationList 
+                id="leftScreenNavigationList">
+                
+                <tnt:NavigationListItem
+                    id="leftScreenFileUploadBtn" 
+                    icon="sap-icon://upload"
+                    text="Upload Files"
+                    select=".onUploadFileBtnSelect"/>
+                <tnt:NavigationListItem
+                    id="leftScreenManageFilesBtn" 
+                    icon="sap-icon://collections-management"
+                    text="Manage Files" 
+                    select=".onManageFileBtnSelect"/>
+            </tnt:NavigationList>
+
+        </content>
+        <footer>
+        <OverflowToolbar>
+        <Button icon="sap-icon://add" text="New chat" press=".onCreateNewChat"/>
+        </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>
