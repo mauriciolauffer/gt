@@ -38,6 +38,7 @@
   "sapux": [
     "app/documents",
     "app/embedding",
-    "app/chatting"
+    "app/chatting",
+    "app/chat"
   ]
 }

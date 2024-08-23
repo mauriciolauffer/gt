@@ -1,0 +1,72 @@
+<mvc:View controllerName="chat.controller.App"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns:upload="sap.m.upload"
+    xmlns="sap.m">
+    <App id="app">
+        <Page id="page" floatingFooter="true" title="{i18n>title}" busy="{ui>/busy}"
+            busyIndicatorDelay="0">
+            <content>
+                <upload:UploadSet
+                    id="uploadSet"
+                    instantUpload="false"
+                    uploadEnabled="true"
+                    showIcons="true"
+                    terminationEnabled="true"
+                    maxFileNameLength="30"
+                    maxFileSize="200"
+                    fileTypes="pdf"
+                    mediaTypes="application/pdf"
+                    afterItemAdded=".onAfterItemAdded"
+                    uploadCompleted=".onUploadCompleted"
+                    mode="None"
+                    items="{
+                    path:'files>/Files',
+                    parameters: { $orderby: 'createdAt desc' },
+                    templateShareable: false
+                    }">
+                    <upload:UploadSetItem
+                        id="uploadSetItems"
+                        fileName="{files>fileName}"
+                        mediaType="{files>mediaType}"
+                        enabledEdit="false"
+                        visibleEdit="false"
+                        enabledRemove="false"
+                        visibleRemove="false"
+                    >
+                        <ObjectAttribute
+                            id="uploadSetItemAttribute1"
+                            title="Uploaded By"
+                            text="{files>createdBy}"
+                            active="false" />
+                        <ObjectAttribute
+                            id="uploadSetItemAttribute2"
+                            title="Uploaded on"
+                            text="{files>createdAt}"
+                            active="false" />
+                        <ObjectAttribute
+                            id="uploadSetItemAttribute3"
+                            title="File Size"
+                            text="{files>size}"
+                            active="false" />
+                    </upload:UploadSetItem>
+                </upload:UploadSet>
+                <!-- <List
+                    showSeparators="Inner"
+                    items="{chat>/}">
+                    <items>
+                        <StandardListItem
+                            title="{fileName}"
+                            description="{mediaType}"
+                            icon="{ProductPicUrl}"
+                            iconDensityAware="false" />
+                    </items>
+                    <noData>
+                        <IllustratedMessage enableVerticalResponsiveness="true"
+                            illustrationType="sapIllus-NoData" />
+                    </noData>
+                </List> -->
+            </content>
+        </Page>
+    </App>
+</mvc:View>

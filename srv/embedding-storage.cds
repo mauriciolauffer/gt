@@ -18,6 +18,7 @@ service EmbeddingStorageService  {
   }])                  as projection on db.Files;
 
   action   storeEmbeddings(uuid : String) returns String;
+  action   createEmbeddings() returns String;
   function deleteEmbeddings()             returns String;
 
 }

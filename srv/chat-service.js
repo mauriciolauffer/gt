@@ -70,7 +70,7 @@ module.exports = class Chat extends cds.ApplicationService {
         const response = {
           role: ragResponse.completion.choices[0].message.role,
           content: ragResponse.completion.choices[0].message.content,
-          messageTime: new Date().toJSON(),
+          timestamp: new Date().toJSON(),
           additionalContents: ragResponse.additionalContents,
         };
 

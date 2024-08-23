@@ -12,12 +12,10 @@ service ChatService {
     type RagResponse {
         role               : String;
         content            : String;
-        messageTime        : String;
+        timestamp          : String;
         additionalContents : array of RagResponse_AdditionalContents;
     }
 
-    action   getChatRagResponse(conversationId : String, messageId : String, message_time : Timestamp, user_id : String, user_query : String) returns RagResponse;
-    action   getAiResponse(sessionId : String, content : String, timestamp : Timestamp) returns RagResponse;
-    function deleteChatData()                                                                                                                 returns String;
-    action   deleteChatSession(sessionId: UUID)                                                                                                                     returns String;
+    action getAiResponse(sessionId : String, content : String, timestamp : Timestamp) returns RagResponse;
+    action deleteChatSession(sessionId : UUID)                                        returns String;
 }

@@ -4,7 +4,7 @@
     "id": "chat",
     "type": "application",
     "i18n": {
-      "bundleName": "chatting.i18n.i18n",
+      "bundleName": "chat.i18n.i18n",
       "supportedLocales": [
         ""
       ],
@@ -122,5 +122,9 @@
       "async": true,
       "id": "App"
     }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "capgenairag.service"
   }
 }

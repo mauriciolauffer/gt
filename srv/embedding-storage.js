@@ -2,9 +2,26 @@ const fs = require("node:fs");
 const cds = require("@sap/cds");
 const { INSERT, DELETE, SELECT } = cds.ql;
 // const { TextLoader } = require("langchain/document_loaders/fs/text");
-const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
 const { PDFDocument } = require("pdf-lib");
-const { PDFLoader } = require("langchain/document_loaders/fs/pdf");
+const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
+const {
+  PDFLoader,
+} = require("@langchain/community/document_loaders/fs/pdf");
+
+const {
+  WebPDFLoader,
+} = require("@langchain/community/document_loaders/web/pdf");
+
+function getAiEmbeddingConfig() {
+  const genAiHub = cds.env.requires["GENERATIVE_AI_HUB"];
+  return {
+    destinationName: genAiHub["EMBEDDING_MODEL_DESTINATION_NAME"],
+    resourceGroup: genAiHub["EMBEDDING_MODEL_RESOURCE_GROUP"],
+    deploymentUrl: genAiHub["EMBEDDING_MODEL_DEPLOYMENT_URL"],
+    modelName: genAiHub["EMBEDDING_MODEL_NAME"],
+    apiVersion: genAiHub["EMBEDDING_MODEL_API_VERSION"],
+  };
+}
 
 // Helper method to convert embeddings to buffer for insertion
 let array2VectorBuffer = (data) => {
@@ -43,21 +60,65 @@ const deleteIfExists = (filePath) => {
 module.exports = class Embedding extends cds.ApplicationService {
   init() {
     const { Files, DocumentChunk } = this.entities;
-    this.on("CREATE", DocumentChunk, async (req) => {
-      console.dir('on..........');
+    /* this.on("CREATE", Files, async (req) => {
+      console.dir("on CREATE Files..........");
       console.dir(req.data);
-      await cds.create(DocumentChunk).entries(req.data)
+      await cds.create(Files).entries(req.data);
+    });
+    this.after("CREATE", Files, (results) => {
+      console.dir("after CREATE Files..............");
+      console.dir(results);
+    }); */
+
+    /* this.on("UPDATE", Files, async (req) => {
+      console.dir("on Files..........");
+      console.dir(req.data);
+      const incomingFile = req.data;
+      const content = req.data.content;
+      // incomingFile.content
+
+      // Create a Blob from the buffer
+      if (content.readable) {
+        console.dir(content.readable)
+      }
+      const nike10kPDFBlob = new Blob(content.readableBuffer, {
+        type: incomingFile.mediaType,
+      });
+      const loader = new WebPDFLoader(nike10kPDFBlob, {
+        // required params = ...
+        // optional params = ...
+      });
+      // const docs = await loader.load();
+      // console.dir(docs[0]);
+      // await cds.create(Files).entries(req.data);
+    }); */
+    this.before("UPDATE", Files, (results) => {
+      console.dir("after Files..............");
+      console.dir(results);
+    });
+    this.after("UPDATE", Files, (results) => {
+      console.dir("after Files..............");
+      console.dir(results);
     });
 
+    this.on("CREATE", DocumentChunk, async (req) => {
+      console.dir("on DocumentChunk..........");
+      console.dir(req.data);
+      await cds.create(DocumentChunk).entries(req.data);
+    });
     this.after("CREATE", DocumentChunk, (results) => {
-      console.dir('after..............');
+      console.dir("after DocumentChunk..............");
       console.dir(results);
+    });
+
+    this.on("createEmbeddings", async (req) => {
+      console.dir("createEmbeddings..............");
+      console.dir(req.data);
     });
 
     this.on("storeEmbeddings", async (req) => {
       try {
         const { uuid } = req.data;
-        const db = await cds.connect.to("db");
         const { Files, DocumentChunk } = this.entities;
         const vectorplugin = await cds.connect.to("cap-llm-plugin");
         let textChunkEntries = [];
@@ -123,7 +184,7 @@ module.exports = class Embedding extends cds.ApplicationService {
         await DELETE.from(DocumentChunk);
 
         // Load the document to langchain text loader
-        loader = new PDFLoader(tempDocLocation);
+        const loader = new PDFLoader(tempDocLocation);
         const document = await loader.load();
 
         // Split the document into chunks
@@ -138,9 +199,10 @@ module.exports = class Embedding extends cds.ApplicationService {
         console.log(`Documents split into ${textChunks.length} chunks.`);
 
         console.log("Generating the vector embeddings for the text chunks.");
+        const aiEmbeddingConfig = getAiEmbeddingConfig();
         // For each text chunk generate the embeddings
         for (const chunk of textChunks) {
-          const embedding = await vectorplugin.getEmbedding(chunk.pageContent);
+          const embedding = await vectorplugin.getEmbedding(aiEmbeddingConfig, chunk.pageContent);
           const entry = {
             text_chunk: chunk.pageContent,
             metadata_column: fileName,
