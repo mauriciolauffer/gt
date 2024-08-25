@@ -2,12 +2,6 @@ namespace capgenairag;
 
 using {cuid, managed} from '@sap/cds/common';
 
-entity Documents : cuid {
-    text      : String;
-    // embedding : Vector(1536);
-    embedding       : String; // for local test with SQLite only
-}
-
 entity Conversation {
     key cID              : UUID not null;
         userID           : String;

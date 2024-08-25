@@ -1,10 +1,10 @@
 {
   "_version": "1.59.0",
   "sap.app": {
-    "id": "chat",
+    "id": "embedding",
     "type": "application",
     "i18n": {
-      "bundleName": "chat.i18n.i18n",
+      "bundleName": "embedding.i18n.i18n",
       "supportedLocales": [
         ""
       ],
@@ -23,15 +23,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/chat/",
-        "type": "OData",
-        "settings": {
-          "annotations": [],
-          "odataVersion": "4.0"
-        }
-      },
-      "fileService": {
-        "uri": "/odata/v4/embedding-storage/",
+        "uri": "/odata/v4/embedding/",
         "type": "OData",
         "settings": {
           "annotations": [],
@@ -79,7 +71,7 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "chat.i18n.i18n",
+          "bundleName": "embedding.i18n.i18n",
           "supportedLocales": [
             ""
           ],
@@ -95,22 +87,6 @@
           "autoExpandSelect": true,
           "earlyRequests": true
         }
-      },
-      "files": {
-        "dataSource": "fileService",
-        "preload": true,
-        "settings": {
-          "synchronizationMode": "None",
-          "operationMode": "Server",
-          "autoExpandSelect": true,
-          "earlyRequests": true
-        }
-      },
-      "ui": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "chat": {
-        "type": "sap.ui.model.json.JSONModel"
       }
     },
     "resources": {
@@ -125,17 +101,17 @@
         "routerClass": "sap.m.routing.Router",
         "viewType": "XML",
         "async": true,
-        "viewPath": "chat.view",
+        "viewPath": "embedding.view",
         "controlAggregation": "pages",
         "controlId": "app",
         "clearControlAggregation": false,
-        "path": "chat.view"
+        "path": "embedding.view"
       },
       "routes": [],
       "targets": {}
     },
     "rootView": {
-      "viewName": "chat.view.App",
+      "viewName": "embedding.view.App",
       "type": "XML",
       "async": true,
       "id": "App"

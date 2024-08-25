@@ -1,7 +1,7 @@
 sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
   "use strict";
 
-  return UIComponent.extend("chat.Component", {
+  return UIComponent.extend("embedding.Component", {
     metadata: {
       manifest: "json",
       interfaces: ["sap.ui.core.IAsyncContentCreation"],
@@ -18,13 +18,6 @@ sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
 
       // enable routing
       this.getRouter().initialize();
-
-      this.getModel("ui").setProperty("/", {
-        sessionId: window.crypto.randomUUID(),
-        enabled: true,
-        busy: false,
-      });
-      this.getModel("chat").setProperty("/", []);
     },
   });
 });

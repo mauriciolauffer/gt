@@ -5,7 +5,7 @@ sap.ui.define(
 
     const logger = Log.getLogger("ai-workshop-embed");
 
-    return BaseController.extend("chat.controller.App", {
+    return BaseController.extend("embedding.controller.App", {
       onAfterItemAdded: async function (evt) {
         const item = evt.getParameter("item");
         try {
@@ -24,8 +24,7 @@ sap.ui.define(
       },
 
       createEntity: async function (item) {
-        window.xxx = item;
-        const data = {
+        const payload = {
           ID: window.crypto.randomUUID(),
           mediaType: item.getMediaType(),
           fileName: item.getFileName(),
@@ -33,8 +32,7 @@ sap.ui.define(
         };
         const url =
           this.getOwnerComponent().getManifestEntry("sap.app").dataSources
-            .fileService.uri + "Files";
-        const payload = data;
+            .mainService.uri + "Files";
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -49,12 +47,12 @@ sap.ui.define(
         }
       },
 
-      uploadContent: function (item, id) {
-        // debugger
-        // var url = `/odata/v4/embedding-storage/Files(${id})/content`;
-        const url = this.getOwnerComponent().getManifestEntry("sap.app").dataSources.fileService.uri + `Files(${id})/content`;
+      uploadContent: function (item, fileId) {
+        const url =
+          this.getOwnerComponent().getManifestEntry("sap.app").dataSources
+            .mainService.uri + `Files(${fileId})/content`;
         item.setUploadUrl(url);
-        var oUploadSet = this.byId("uploadSet");
+        const oUploadSet = this.byId("uploadSet");
         oUploadSet.setHttpRequestMethod("PUT");
         oUploadSet.uploadItem(item);
       },
