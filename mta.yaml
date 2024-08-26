@@ -54,11 +54,11 @@ modules:
       requires:
         - name: capgenairagchat
           artifacts:
-            - documents.zip
+            - chat.zip
           target-path: app/
         - name: capgenairagembedding
           artifacts:
-            - hrapprovalui.zip
+            - embedding.zip
           target-path: app/
 
   - name: capgenairagchat

@@ -137,7 +137,7 @@ module.exports = class EmbeddingService extends cds.ApplicationService {
   init() {
     const { Files, DocumentChunk } = this.entities;
 
-    this.after("UPDATE", Files, async (results, req) => {
+    this.after("UPDATE", Files, async (results) => {
       embeddingDocument(results.ID, this.entities);
     });
 
