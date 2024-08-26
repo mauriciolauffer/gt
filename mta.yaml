@@ -52,18 +52,18 @@ modules:
     build-parameters:
       build-result: app/
       requires:
-        - name: capgenairagdocuments
+        - name: capgenairagchat
           artifacts:
             - documents.zip
           target-path: app/
-        - name: capgenairaghrapprovalui
+        - name: capgenairagembedding
           artifacts:
             - hrapprovalui.zip
           target-path: app/
 
-  - name: capgenairagdocuments
+  - name: capgenairagchat
     type: html5
-    path: app/documents
+    path: app/chat
     build-parameters:
       build-result: dist
       builder: custom
@@ -71,9 +71,9 @@ modules:
         - npm ci
         - npm run build
       supported-platforms: []
-  - name: capgenairaghrapprovalui
+  - name: capgenairagembedding
     type: html5
-    path: app/hr-approval-ui
+    path: app/embedding
     build-parameters:
       build-result: dist
       builder: custom

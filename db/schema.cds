@@ -23,8 +23,8 @@ entity Message {
 entity DocumentChunk : cuid {
     text_chunk      : LargeString;
     metadata_column : LargeString;
-     // embedding       : Vector(1536);
-    embedding       : String; // for local test with SQLite only
+     embedding       : Vector(1536);
+    //embedding       : String; // for local test with SQLite only
 }
 
 entity Files : cuid, managed {

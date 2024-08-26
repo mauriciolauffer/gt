@@ -6,6 +6,10 @@ sap.ui.define(
     const logger = Log.getLogger("ai-workshop-embed");
 
     return BaseController.extend("embedding.controller.App", {
+      onDeleteEmbedding: async function (evt) {
+        await evt.getSource().getObjectBinding().execute();
+      },
+
       onAfterItemAdded: async function (evt) {
         const item = evt.getParameter("item");
         try {
@@ -18,6 +22,12 @@ sap.ui.define(
       },
 
       onUploadCompleted: function (evt) {
+        const oUploadSet = evt.getSource();
+        oUploadSet.removeAllIncompleteItems();
+        oUploadSet.getBinding("items").refresh();
+      },
+
+      onRemoveItem: function (evt) {
         const oUploadSet = evt.getSource();
         oUploadSet.removeAllIncompleteItems();
         oUploadSet.getBinding("items").refresh();
@@ -43,7 +53,7 @@ sap.ui.define(
         if (response.ok) {
           return response.json();
         } else {
-          throw new Error("fetch error...");
+          throw new Error(`${response.status} - ${response.statusText}`);
         }
       },
 

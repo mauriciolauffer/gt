@@ -23,7 +23,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/chat/",
+        "uri": "./odata/v4/chat/",
         "type": "OData",
         "settings": {
           "annotations": [],

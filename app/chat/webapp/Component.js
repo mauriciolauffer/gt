@@ -13,12 +13,8 @@ sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
      * @override
      */
     init: function () {
-      // call the base component's init function
       UIComponent.prototype.init.apply(this, arguments);
-
-      // enable routing
       this.getRouter().initialize();
-
       this.getModel("ui").setProperty("/", {
         sessionId: window.crypto.randomUUID(),
         enabled: true,

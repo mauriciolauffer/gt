@@ -1,7 +1,5 @@
-// const fs = require("node:fs");
 const { writeFile, unlink } = require("node:fs/promises");
 const cds = require("@sap/cds");
-// const { INSERT, DELETE, SELECT } = cds.ql;
 const { PDFDocument } = require("pdf-lib");
 const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
 const { PDFLoader } = require("@langchain/community/document_loaders/fs/pdf");
@@ -18,39 +16,39 @@ function getAiEmbeddingConfig() {
 }
 
 async function preparePdf(tempDocLocation, stream) {
-      // Create a new PDF document
-      const pdfDoc = await PDFDocument.create();
-      const pdfBytes = [];
-  
-      // Collect streaming PDF content
-      stream.on("data", (chunk) => {
-        pdfBytes.push(chunk);
-      });
-  
-      // Wait for the file content stream to finish
-      await new Promise((resolve, reject) => {
-        stream.on("end", resolve);
-        stream.on("error", reject);
-      });
-  
-      // Convert to Buffer
-      const pdfBuffer = Buffer.concat(pdfBytes);
-  
-      // Load PDF buffer into a document
-      const externalPdfDoc = await PDFDocument.load(pdfBuffer);
-  
-      // Copy pages from external PDF document to the new document
-      const pages = await pdfDoc.copyPages(
-        externalPdfDoc,
-        externalPdfDoc.getPageIndices()
-      );
-      pages.forEach((page) => {
-        pdfDoc.addPage(page);
-      });
-  
-      // Save the PDF document to a new file
-      const pdfData = await pdfDoc.save();
-      await writeFile(tempDocLocation, pdfData);
+  // Create a new PDF document
+  const pdfDoc = await PDFDocument.create();
+  const pdfBytes = [];
+
+  // Collect streaming PDF content
+  stream.on("data", (chunk) => {
+    pdfBytes.push(chunk);
+  });
+
+  // Wait for the file content stream to finish
+  await new Promise((resolve, reject) => {
+    stream.on("end", resolve);
+    stream.on("error", reject);
+  });
+
+  // Convert to Buffer
+  const pdfBuffer = Buffer.concat(pdfBytes);
+
+  // Load PDF buffer into a document
+  const externalPdfDoc = await PDFDocument.load(pdfBuffer);
+
+  // Copy pages from external PDF document to the new document
+  const pages = await pdfDoc.copyPages(
+    externalPdfDoc,
+    externalPdfDoc.getPageIndices()
+  );
+  pages.forEach((page) => {
+    pdfDoc.addPage(page);
+  });
+
+  // Save the PDF document to a new file
+  const pdfData = await pdfDoc.save();
+  await writeFile(tempDocLocation, pdfData);
 }
 
 async function embeddingDocument(uuid, entities) {
@@ -64,7 +62,6 @@ async function embeddingDocument(uuid, entities) {
   }
   const tempDocLocation = __dirname + `/${result[0].fileName}`;
   try {
-
     await preparePdf(tempDocLocation, result[0].content);
 
     // Delete existing embeddings
@@ -85,8 +82,9 @@ async function embeddingDocument(uuid, entities) {
     const aiEmbeddingConfig = getAiEmbeddingConfig();
     const textChunkEntries = [];
     const vectorplugin = await cds.connect.to("cap-llm-plugin");
+
     // For each text chunk generate the embeddings
-    /* for (const chunk of textChunks) {
+    for (const chunk of textChunks) {
       const embedding = await vectorplugin.getEmbedding(
         aiEmbeddingConfig,
         chunk.pageContent
@@ -99,13 +97,12 @@ async function embeddingDocument(uuid, entities) {
       textChunkEntries.push(entry);
     }
 
-    console.log("Inserting text chunks with embeddings into db.");
     // Insert the text chunk with embeddings into db
     const insertStatus =
       await INSERT.into(DocumentChunk).entries(textChunkEntries);
     if (!insertStatus) {
       throw new Error("Insertion of text chunks into db failed!");
-    } */
+    }
   } catch (err) {
     throw new Error("Error while generating and storing vector embeddings.", {
       reason: err,
