@@ -51,18 +51,18 @@ async function preparePdf(tempDocLocation, stream) {
   await writeFile(tempDocLocation, pdfData);
 }
 
-async function embeddingDocument(uuid, entities) {
+async function embeddingDocument(data, entities) {
   const { Files, DocumentChunk } = entities;
   const result = await cds
     .read(Files)
-    .columns(["fileName", "content"])
-    .where({ ID: uuid });
+    .columns(["fileName"])
+    .where({ ID: data.ID });
   if (result.length === 0) {
-    throw new Error(`Document ${uuid} not found!`);
+    throw new Error(`Document ${data.ID} not found!`);
   }
   const tempDocLocation = __dirname + `/${result[0].fileName}`;
   try {
-    await preparePdf(tempDocLocation, result[0].content);
+    await preparePdf(tempDocLocation, data.content);
 
     // Delete existing embeddings
     await cds.delete(DocumentChunk);
@@ -92,21 +92,23 @@ async function embeddingDocument(uuid, entities) {
       const entry = {
         text_chunk: chunk.pageContent,
         metadata_column: result[0].fileName,
-        embedding: array2VectorBuffer(embedding),
+        embedding: array2VectorBuffer(embedding.data[0].embedding),
       };
       textChunkEntries.push(entry);
     }
 
     // Insert the text chunk with embeddings into db
-    const insertStatus =
-      await INSERT.into(DocumentChunk).entries(textChunkEntries);
-    if (!insertStatus) {
+    const status = await INSERT.into(DocumentChunk).entries(textChunkEntries);
+    if (!status) {
       throw new Error("Insertion of text chunks into db failed!");
     }
   } catch (err) {
-    throw new Error("Error while generating and storing vector embeddings.", {
-      reason: err,
-    });
+    throw new Error(
+      "Error while generating and storing vector embeddings: " + err?.message,
+      {
+        reason: err,
+      }
+    );
   } finally {
     // Delete temp document
     deleteTempFile(tempDocLocation);
@@ -114,11 +116,10 @@ async function embeddingDocument(uuid, entities) {
 }
 
 // Helper method to convert embeddings to buffer for insertion
-let array2VectorBuffer = (data) => {
+function array2VectorBuffer(data) {
   const sizeFloat = 4;
   const sizeDimensions = 4;
   const bufferSize = data.length * sizeFloat + sizeDimensions;
-
   const buffer = Buffer.allocUnsafe(bufferSize);
   // write size into buffer
   buffer.writeUInt32LE(data.length, 0);
@@ -126,7 +127,7 @@ let array2VectorBuffer = (data) => {
     buffer.writeFloatLE(value, index * sizeFloat + sizeDimensions);
   });
   return buffer;
-};
+}
 
 // Helper method to delete file if it already exists
 function deleteTempFile(filePath) {
@@ -137,15 +138,15 @@ module.exports = class EmbeddingService extends cds.ApplicationService {
   init() {
     const { Files, DocumentChunk } = this.entities;
 
-    this.after("UPDATE", Files, async (results) => {
-      embeddingDocument(results.ID, this.entities);
+    this.on("UPDATE", Files, async (req) => {
+      await embeddingDocument(req.data, this.entities);
     });
 
     this.on("deleteEmbeddings", async () => {
       try {
-        await cds.delete(DocumentChunk);
+        await Promise.all([cds.delete(Files), cds.delete(DocumentChunk)]);
       } catch (err) {
-        throw new Error("Error deleting the embeddings from db.", {
+        throw new Error("Error deleting the embeddings from db: " + err?.message, {
           reason: err,
         });
       }

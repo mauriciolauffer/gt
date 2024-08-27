@@ -15,15 +15,15 @@
     "workzone": true,
     "GENERATIVE_AI_HUB": {
       "CHAT_MODEL_DESTINATION_NAME": "AICoreAzureOpenAIDestination",
-      "CHAT_MODEL_DEPLOYMENT_URL": "/inference/deployments/de258b12579cf502",
+      "CHAT_MODEL_DEPLOYMENT_URL": "/inference/deployments/d3bd8a755801da3f",
       "CHAT_MODEL_RESOURCE_GROUP": "default",
       "CHAT_MODEL_NAME": "gpt-4o",
-      "CHAT_MODEL_API_VERSION": "2024-05-13",
+      "CHAT_MODEL_API_VERSION": "2023-05-15",
       "EMBEDDING_MODEL_DESTINATION_NAME": "AICoreAzureOpenAIDestination",
-      "EMBEDDING_MODEL_DEPLOYMENT_URL": "/inference/deployments/de479d54b3e9af7f",
+      "EMBEDDING_MODEL_DEPLOYMENT_URL": "/inference/deployments/d89e763489c1afae",
       "EMBEDDING_MODEL_RESOURCE_GROUP": "default",
       "EMBEDDING_MODEL_NAME": "text-embedding-ada-002",
-      "EMBEDDING_MODEL_API_VERSION": "2"
+      "EMBEDDING_MODEL_API_VERSION": "2023-05-15"
     },
     "AICoreAzureOpenAIDestination": {
       "kind": "rest",

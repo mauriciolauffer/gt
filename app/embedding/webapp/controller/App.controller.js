@@ -6,8 +6,20 @@ sap.ui.define(
     const logger = Log.getLogger("ai-workshop-embed");
 
     return BaseController.extend("embedding.controller.App", {
-      onDeleteEmbedding: async function (evt) {
-        await evt.getSource().getObjectBinding().execute();
+      onDeleteEmbeddings: async function () {
+        const url = this.getODataModelUrl() + "deleteEmbeddings";
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        });
+        if (response.ok) {
+          // return response.json();
+        } else {
+          throw new Error(`${response.status} - ${response.statusText}`);
+        }
       },
 
       onAfterItemAdded: async function (evt) {
@@ -40,9 +52,7 @@ sap.ui.define(
           fileName: item.getFileName(),
           size: item.getFileObject().size.toString(),
         };
-        const url =
-          this.getOwnerComponent().getManifestEntry("sap.app").dataSources
-            .mainService.uri + "Files";
+        const url = this.getODataModelUrl() + "Files";
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -58,14 +68,16 @@ sap.ui.define(
       },
 
       uploadContent: function (item, fileId) {
-        const url =
-          this.getOwnerComponent().getManifestEntry("sap.app").dataSources
-            .mainService.uri + `Files(${fileId})/content`;
+        const url = this.getODataModelUrl() + `Files(${fileId})/content`;
         item.setUploadUrl(url);
         const oUploadSet = this.byId("uploadSet");
         oUploadSet.setHttpRequestMethod("PUT");
         oUploadSet.uploadItem(item);
       },
+
+      getODataModelUrl: function() {
+        return this.getOwnerComponent().getManifestEntry("sap.app").dataSources.mainService.uri;
+      }
     });
   }
 );

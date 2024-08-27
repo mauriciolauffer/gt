@@ -6,7 +6,7 @@
     <App id="app">
         <Page id="page" floatingFooter="true" title="{i18n>title}" busyIndicatorDelay="0">
             <headerContent>
-                <Button icon="sap-icon://delete" tooltip="Delete embeddings" press=".onDeleteEmbeddings" binding="{/deleteEmbeddings(...)}" />
+                <Button icon="sap-icon://delete" tooltip="Delete embeddings" press=".onDeleteEmbeddings" />
             </headerContent>
             <content>
                 <upload:UploadSet
