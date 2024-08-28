@@ -5,7 +5,7 @@
     <App id="app">
         <Page id="page" floatingFooter="true" title="{i18n>title}" busy="{ui>/busy}" busyIndicatorDelay="0">
             <headerContent>
-                <Button icon="sap-icon://delete" tooltip="Delete chat" press=".onDeleteChat" binding="{/deleteChatSession(...)}" />
+                <Button icon="sap-icon://delete" tooltip="{i18n>delete}" press=".onDeleteChat" binding="{/deleteChatSession(...)}" />
             </headerContent>
             <content>
                 <List

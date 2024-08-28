@@ -32,10 +32,5 @@
         "requestTimeout": "300000"
       }
     }
-  },
-  "cdsc": {
-    "severities": {
-      "odata-spec-violation-no-key": "Warning"
-    }
   }
 }

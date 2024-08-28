@@ -6,20 +6,9 @@ sap.ui.define(
     const logger = Log.getLogger("ai-workshop-embed");
 
     return BaseController.extend("embedding.controller.App", {
-      onDeleteEmbeddings: async function () {
-        const url = this.getODataModelUrl() + "deleteEmbeddings";
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({}),
-        });
-        if (response.ok) {
-          // return response.json();
-        } else {
-          throw new Error(`${response.status} - ${response.statusText}`);
-        }
+      onDeleteEmbeddings: async function (evt) {
+        await evt.getSource().getObjectBinding().execute();
+        this.byId("uploadSet").getModel().refresh()
       },
 
       onAfterItemAdded: async function (evt) {

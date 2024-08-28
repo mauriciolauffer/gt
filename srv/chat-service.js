@@ -30,15 +30,15 @@ function getAiChatConfig() {
   };
 }
 
-function addMessagesToChatHistory(sessionId, user, system) {
+function addMessagesToChatHistory(sessionId, userContent, assistantContent) {
   const chatHistory = chatHistoryInMemory[sessionId];
   chatHistory.push({
     role: "user",
-    content: user.content,
+    content: userContent,
   });
   chatHistory.push({
-    role: system.role,
-    content: system.content,
+    role: "assistant",
+    content: assistantContent,
   });
 }
 
@@ -76,8 +76,8 @@ module.exports = class Chat extends cds.ApplicationService {
 
         addMessagesToChatHistory(
           req.data.sessionId,
-          { content: userQuery },
-          response
+          userQuery,
+          response.content
         );
         return response;
       } catch (err) {

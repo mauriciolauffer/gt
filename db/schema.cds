@@ -13,16 +13,15 @@ entity Conversation : cuid, managed {
 }
 
 entity Message : cuid, managed {
-    conversation  : Association to Conversation;
-    role          : String;
-    content       : LargeString;
+    conversation : Association to Conversation;
+    role         : String;
+    content      : LargeString;
 }
 
 entity DocumentChunk : cuid {
     text_chunk      : LargeString;
     metadata_column : LargeString;
     embedding       : Vector(1536);
-//embedding       : String; // for local test with SQLite only
 }
 
 entity Files : cuid, managed {
